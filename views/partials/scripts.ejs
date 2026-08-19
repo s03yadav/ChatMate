@@ -1,0 +1,510 @@
+```html
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Socket.IO Client -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+  // =========================================================
+  // 1. SOCKET CONNECTION & GLOBAL VARIABLES
+  // =========================================================
+
+  const socket = io();
+
+  // Stores the currently opened chat ID
+  let currentChatId = null;
+
+  // Stores the currently selected user from the chat list
+  let selectedChatItem = null;
+
+  // ID of the currently logged-in user
+  const loggedUserId = "<%= loggedUser.id %>";
+
+
+  // =========================================================
+  // 2. DOM ELEMENT REFERENCES
+  // =========================================================
+
+  // Message input and send button
+  const sendBtn = document.getElementById('sendBtn');
+  const messageInput = document.getElementById('messageInput');
+
+  // Chat header elements
+  const profileImg = document.getElementById("chatProfilePicture");
+  const userName = document.getElementById("chatUserName");
+  const userStatus = document.getElementById("chatUserStatus");
+
+  // Chat screen containers
+  const emptyChat = document.getElementById("emptyChat");
+  const activeChat = document.getElementById("activeChat");
+  const messagesContainer = document.getElementById('messagesContainer');
+
+  // Message elements
+  const incommingMsg = document.getElementById('incomming-msg');
+  const outgoingMsg = document.getElementById('outgoing-msg');
+
+  // Receiver profile/modal elements
+  const receiverProfileImg = document.getElementById("receiverProfileImg");
+  const receiverName = document.getElementById("receiverName");
+  const receiverDesignation = document.getElementById("receiverDesignation");
+  const receiverEmail = document.getElementById("receiverEmail");
+  const reciverStatus = document.getElementById("reciverStatus");
+
+
+  const teamChat = document.getElementById("teamChat");
+  const teamMessagesContainer = document.getElementById("teamMessagesContainer");
+
+  const teamProfilePicture = document.getElementById("teamProfilePicture");
+  const teamName = document.getElementById("teamName");
+  const teamUserStatus = document.getElementById("teamUserStatus");
+
+  const teamMessageInput = document.getElementById("teamMessageInput");
+  const teamSendBtn = document.getElementById("teamSendBtn");
+
+  let currentTeamId = null;
+  let currentTeamChatId = null;
+  let currentTeamMembers = [];
+
+  // =========================================================
+  // 3. SOCKET CONNECTION EVENTS
+  // =========================================================
+
+  // Runs automatically when the Socket.IO connection is established
+  socket.on("connect", () => {
+    console.log("Connected:", socket.id);
+  });
+
+  // Runs automatically when the Socket.IO connection fails
+  socket.on("connect_error", (err) => {
+    console.log(err.message);
+  });
+
+
+  // =========================================================
+  // 4. OPEN CHAT
+  // =========================================================
+
+  // Add a click event to every user in the chat/user list
+  document.querySelectorAll(".user").forEach(user => {
+
+    user.addEventListener('click', () => {
+
+      // Remember which chat-list item is currently selected
+      selectedChatItem = user;
+
+      // Get the receiver's ID from the element's data-id attribute
+      const receiverId = user.dataset.id;
+
+      // Ask the server to open/find the chat with this receiver
+      socket.emit("open-chat", {
+        receiverId
+      });
+    });
+  });
+
+  // =========================================================
+  // 4. OPEN TEAM CHAT
+  // =========================================================
+
+
+  document.querySelectorAll(".team-item").forEach(team => {
+    team.addEventListener('click', () => {
+      // selectedTeamItem = team;
+
+      const teamId = team.dataset.id;
+      currentTeamId = teamId;
+      console.log(`Team ID : ${teamId}`);
+
+      socket.emit('open-teamChat', {
+        teamId
+      });
+    });
+  });
+
+
+  // =========================================================
+  // 4. OPEN TEAM CHAT EVENT
+  // =========================================================
+
+  socket.on("team-chat-opened", (data) => {
+    console.log("Team Chat Opened :", data);
+
+    currentTeamId = data.team._id;
+    currentTeamChatId = data.chat._id;
+
+    currentTeamMembers = data.members;
+
+    // Displaying team data on team chat area
+    teamProfilePicture.src = data.team.groupPicture || "/user/default.jpg";
+    teamName.innerText = data.team.name;
+
+    // Displaying members online
+    const onlineMembers = data.members.filter(
+      member => member.status === "Online"
+    );
+    teamUserStatus.innerText = `${onlineMembers.length} Members Online`
+
+    // Hiding active chat or empty chat and displaying team chat area
+    emptyChat.classList.add("d-none");
+    emptyChat.classList.remove("d-flex");
+
+    activeChat.classList.add("d-none");
+    activeChat.classList.remove("d-flex");
+
+    teamChat.classList.remove("d-none");
+    teamChat.classList.add("d-flex");
+
+    // Clear different team chat messages
+    teamMessagesContainer.innerHTML = "";
+
+    data.messages.forEach(message => {
+      appendTeamMessage(message);
+    });
+
+
+  });
+
+
+
+  function appendTeamMessage(message) {
+
+    const isMine =
+      String(message.sender._id || message.sender.id) ===
+      String(loggedUserId);
+
+    const messageRow = document.createElement("div");
+
+    messageRow.classList.add(
+      "message-row",
+      "d-flex",
+      "align-items-end",
+      "gap-2"
+    );
+
+    if (isMine) {
+
+      messageRow.classList.add(
+        "outgoing",
+        "flex-row-reverse"
+      );
+
+    } else {
+
+      messageRow.classList.add(
+        "incoming",
+        "flex-row"
+      );
+
+    }
+
+
+    // Profile picture
+    const profile = document.createElement("img");
+
+    profile.classList.add(
+      "message-avatar",
+      "mb-1"
+    );
+
+    profile.src =
+      message.sender.profilePicture || "/user/default.jpg";
+
+    profile.alt =
+      message.sender.fullName;
+
+
+    // Content wrapper
+    const content = document.createElement("div");
+
+    content.classList.add("message-content");
+
+
+    // Sender name
+    if (!isMine) {
+
+      const senderName =
+        document.createElement("span");
+
+      senderName.classList.add("sender-name");
+
+      senderName.innerText =
+        message.sender.fullName;
+
+      content.appendChild(senderName);
+
+    }
+
+
+    // Message bubble
+    const bubble =
+      document.createElement("div");
+
+    bubble.classList.add("message-bubble");
+
+    bubble.innerText =
+      message.text;
+
+
+    // Time
+    const time =
+      document.createElement("div");
+
+    time.classList.add("message-time");
+
+    time.innerText =
+      new Date(message.createdAt)
+        .toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+
+
+    content.appendChild(bubble);
+    content.appendChild(time);
+
+    messageRow.appendChild(profile);
+    messageRow.appendChild(content);
+
+    teamMessagesContainer.appendChild(messageRow);
+
+
+    // Scroll to bottom
+    teamMessagesContainer.scrollTop =
+      teamMessagesContainer.scrollHeight;
+  }
+
+
+  teamSendBtn.addEventListener("click", () => {
+
+    const text =
+      teamMessageInput.value.trim();
+
+    if (!text || !currentTeamChatId) {
+      return;
+    }
+
+    socket.emit("send-team-message", {
+
+      chatId: currentTeamChatId,
+
+      text: text
+
+    });
+
+    teamMessageInput.value = "";
+
+  });
+
+
+  // =========================================================
+  // 5. DISPLAY A MESSAGE IN THE CHAT
+  // =========================================================
+
+  function appendMessage(message) {
+
+    console.log(message);
+
+    // Update the selected user's chat preview in the sidebar
+    if (selectedChatItem) {
+
+      const preview = selectedChatItem.querySelector(".chat-preview");
+
+      if (preview) {
+        preview.innerText = message.text.slice(0, 16) + "...";
+      }
+    }
+
+
+    // Get the messages container
+    const messagesContainer = document.getElementById("messagesContainer");
+
+    // Determine whether the message was sent by the logged-in user
+    const isMine =
+      String(message.sender.id || message.sender._id) === String(loggedUserId);
+
+
+    // ---------------------------------------------------------
+    // Create message row
+    // ---------------------------------------------------------
+
+    const messageRow = document.createElement("div");
+    messageRow.classList.add("message-row");
+
+    // Apply different styling depending on the sender
+    if (isMine) {
+      messageRow.classList.add("outgoing");
+    } else {
+      messageRow.classList.add("incoming");
+    }
+
+
+    // ---------------------------------------------------------
+    // Create message bubble
+    // ---------------------------------------------------------
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+
+
+    // ---------------------------------------------------------
+    // Add message text
+    // ---------------------------------------------------------
+
+    const text = document.createElement("div");
+    text.classList.add("message-text");
+    text.innerText = message.text;
+
+
+    // ---------------------------------------------------------
+    // Add message timestamp
+    // ---------------------------------------------------------
+
+    const time = document.createElement("div");
+    time.classList.add("message-time");
+
+    const createdAt = new Date(message.createdAt);
+
+    time.innerText = createdAt.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+
+    // ---------------------------------------------------------
+    // Build the message structure
+    // ---------------------------------------------------------
+
+    bubble.appendChild(text);
+    bubble.appendChild(time);
+
+    messageRow.appendChild(bubble);
+
+    messagesContainer.appendChild(messageRow);
+
+
+    // Automatically scroll to the newest message
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+
+  // =========================================================
+  // 6. SEND MESSAGE
+  // =========================================================
+
+  sendBtn.addEventListener('click', () => {
+
+    // Get the message and remove unnecessary spaces
+    const text = messageInput.value.trim();
+
+    // Do not send an empty message or message without an active chat
+    if (!text || !currentChatId) {
+      return;
+    }
+
+    // Send the message data to the server
+    socket.emit("send-message", {
+      chatId: currentChatId,
+      text
+    });
+
+    // Clear the input after sending
+    messageInput.value = "";
+  });
+
+
+  // =========================================================
+  // 7. CHAT OPENED EVENT
+  // =========================================================
+
+  // Triggered by the server after a chat has been opened
+  // Contains the chat ID, receiver information and previous messages
+  socket.on("chat-opened", (data) => {
+
+    console.log(data);
+
+
+    // ---------------------------------------------------------
+    // Store the current chat ID
+    // ---------------------------------------------------------
+
+    currentChatId = data.chatId;
+
+
+    // ---------------------------------------------------------
+    // Update chat header with receiver information
+    // ---------------------------------------------------------
+
+    profileImg.src = data.receiver.profilePicture;
+    userName.innerText = data.receiver.fullName;
+    userStatus.innerText = data.receiver.status;
+
+
+    // Update status styling
+    userStatus.classList.remove("text-muted", "text-success", "text-danger");
+
+    if (userStatus.innerText === "Online") {
+      userStatus.classList.add("text-success")
+    } else {
+      userStatus.classList.add("text-danger")
+    }
+
+
+    // ---------------------------------------------------------
+    // Update receiver profile modal
+    // ---------------------------------------------------------
+
+    receiverProfileImg.src = data.receiver.profilePicture;
+    receiverName.innerHTML = data.receiver.fullName;
+    receiverDesignation.innerHTML = data.receiver.desgination || "";
+    receiverEmail.innerHTML = data.receiver.email || "";
+    reciverStatus.innerHTML = data.receiver.status || "";
+
+
+    // ---------------------------------------------------------
+    // Switch from empty screen to active chat
+    // ---------------------------------------------------------
+
+    emptyChat.classList.add("d-none");
+    emptyChat.classList.remove("d-flex");
+    
+    teamChat.classList.add("d-none");
+    teamChat.classList.remove("d-flex");
+
+    activeChat.classList.remove("d-none");
+    activeChat.classList.add("d-flex");
+
+
+    // ---------------------------------------------------------
+    // Clear messages from the previously opened chat
+    // ---------------------------------------------------------
+
+    messagesContainer.innerHTML = "";
+
+
+    // ---------------------------------------------------------
+    // Display previous messages
+    // ---------------------------------------------------------
+
+    data.messages.forEach(message => {
+      appendMessage(message);
+    });
+
+  });
+
+  socket.on("receive-team-message", (message) => {
+
+    appendTeamMessage(message);
+
+  });
+
+  // =========================================================
+  // 8. RECEIVE NEW MESSAGE
+  // =========================================================
+
+  // Triggered by the server whenever a new message is received
+  socket.on("receive-message", (message) => {
+    appendMessage(message);
+  });
+
+</script>

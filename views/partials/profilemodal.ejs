@@ -1,0 +1,44 @@
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden; background-color: #ffffff;">
+      
+      <!-- Modal Header with Close Button -->
+      <div class="modal-header border-bottom-0 pb-0 pt-3 px-3 position-relative">
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body text-center pt-0 px-4 pb-4">
+        <div id="userInformation"> 
+          
+          <!-- Avatar Container with Status Dot -->
+          <div class="position-relative d-inline-block mb-3">
+            <img src="/user/default.jpg" alt="Profile Picture" id="receiverProfileImg" class="rounded-circle object-fit-cover shadow-sm" style="width: 80px; height: 80px;">
+            <span class="status-indicator" style="width: 14px; height: 14px; border-width: 2px; bottom: 3px; right: 3px;"></span>
+          </div>
+
+          <!-- User Name -->
+          <h5 class="fw-bold mb-1 text-dark" id="receiverName">Sumit</h5>
+          
+          <!-- Designation Subtitle -->
+          <p class="text-muted small mb-3" id="receiverDesignation">Junior Software Developer</p>
+
+          <!-- Details Card -->
+          <div class="p-3 text-start rounded-3" style="background-color: var(--sidebar-bg); border: 1px solid var(--border-color);">
+            <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+              <span class="text-muted extra-small fw-medium">Email</span>
+              <span class="small fw-semibold text-dark text-truncate ms-2" style="max-width: 170px;" id="receiverEmail">brijbinisy@gmail.com</span>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted extra-small fw-medium">Status</span>
+              <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle extra-small fw-semibold px-2 py-1" id="reciverStatus">Online</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

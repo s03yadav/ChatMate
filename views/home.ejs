@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('./partials/header') %>
+
+  <body>
+
+    <div class="container-fluid p-0 app-container">
+      <div class="row g-0 h-100">
+
+        <%- include('./partials/sidebar') %>
+
+          <!-- RIGHT CHAT AREA -->
+          <div class="col-8 col-md-9 chat-area">
+
+
+
+            <!-- NO CHAT SELECTED STATE (DEFAULT) -->
+            <div id="emptyChat"
+              class="empty-chat-state d-flex flex-column align-items-center justify-content-center text-center h-100 p-4">
+              <div class="empty-state-icon-wrapper mb-3">
+                <i class="bi bi-chat-square-text-fill"></i>
+              </div>
+              <h5 class="fw-bold text-dark mb-2">Your Messages</h5>
+              <p class="text-muted small max-w-360 mb-4">
+                Select a conversation from the sidebar to view messages, share files, and collaborate with your team.
+              </p>
+              <div class="d-flex align-items-center gap-2 text-muted extra-small">
+                <i class="bi bi-shield-lock-fill text-primary"></i>
+                <span>End-to-end encrypted team workspace</span>
+              </div>
+            </div>
+
+
+            
+            <!-- ACTIVE CHAT AREA (Hidden by default with 'd-none') -->
+            <div id="activeChat" class="d-none flex-column h-100">
+
+              <!-- Active Chat Header -->
+              <div class="chat-header d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#profileModal">
+                <img src="/user/default.jpg" alt="Avatar" id="chatProfilePicture" class="chat-avatar me-3">
+                <div>
+                  <h6 class="mb-0 fw-bold" id="chatUserName">Selected user</h6>
+                  <span class="text-muted small" id="chatUserStatus">Status</span>
+                </div>
+              </div>
+
+              <!-- Messages Area -->
+              <div class="messages-container" id="messagesContainer">
+              </div>
+
+              <!-- Input Area -->
+              <div class="chat-input-area">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" class="form-control chat-input" id="messageInput" placeholder="Type a message...">
+                  <button class="btn-send" id="sendBtn">
+                    <i class="bi bi-arrow-up-short fs-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+
+            <!-- ACTIVE TEAM CHAT AREA -->
+            <div id="teamChat" class="d-none flex-column h-100">
+
+              <!-- Active Team Chat Header -->
+              <div class="chat-header d-flex align-items-center" data-bs-toggle="modal"
+                data-bs-target="#teamProfileModal">
+                <img src="/user/team-default.jpg" alt="Team Avatar" id="teamProfilePicture" class="chat-avatar me-3">
+                <div>
+                  <h6 class="mb-0 fw-bold" id="teamName">Engineering Team</h6>
+                  <span class="text-muted small" id="teamUserStatus">5 Members Online</span>
+                </div>
+              </div>
+
+              <!-- Messages Area -->
+              <div class="messages-container" id="teamMessagesContainer">
+
+                <!-- Date Separator Example -->
+                <div class="date-divider">Today</div>
+
+                <!-- Incoming Message Row with Profile Picture -->
+                <div class="message-row incoming d-flex flex-row align-items-end gap-2">
+                  <img src="/user/alex.jpg" alt="Alex" class="message-avatar mb-1" title="Alex">
+                  <div class="message-content">
+                    <span class="sender-name">Alex Smith</span>
+                    <div class="message-bubble">
+                      Hey team, has anyone reviewed the latest pull request?
+                    </div>
+                    <div class="message-time">10:14 AM</div>
+                  </div>
+                </div>
+
+                <!-- Outgoing Message Row (Current User) -->
+                <div class="message-row outgoing d-flex flex-row-reverse align-items-end gap-2">
+                  <img src="/user/current-user.jpg" alt="You" class="message-avatar mb-1" title="You">
+                  <div class="message-content">
+                    <div class="message-bubble">
+                      Yes, taking a look at it right now!
+                    </div>
+                    <div class="message-time">10:15 AM</div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Input Area -->
+              <div class="chat-input-area">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" class="form-control chat-input" id="teamMessageInput"
+                    placeholder="Type a message to the team...">
+                  <button class="btn-send" id="teamSendBtn">
+                    <i class="bi bi-arrow-up-short fs-4"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+      </div>
+    </div>
+
+    <%- include('./partials/createTeamModal.ejs') %>
+      <%- include('./partials/profilemodal') %>
+        <%- include('./partials/scripts') %>
+  </body>
+
+</html>
