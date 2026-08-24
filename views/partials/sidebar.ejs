@@ -36,7 +36,7 @@
 
       <% if (typeof teams !=='undefined' && teams.length> 0) { %>
         <% teams.forEach(team=> { %>
-          <div class="chat-item team-item" data-id="<%= team._id %>" data-type="team">
+          <div class="chat-item team-item" data-id="<%= team._id %>" data-chat-id="<%= team.chat?._id || team.chat || '' %>" data-type="team">
             <img src="<%= team.image || team.groupPicture || '/user/default.jpg' %>" alt="Team Avatar"
               class="chat-avatar me-3">
             <div class="flex-grow-1 overflow-hidden me-2">
@@ -45,12 +45,14 @@
                   <%= team.name || team.groupName %>
                 </h6>
                 <span class="chat-time">
-                  <%= team?.lastMessagedAt ? new Date(team.lastMessagedAt).toLocaleTimeString("default", {
-                    hour: "2-digit" , minute: "2-digit" }) : "" %>
+                  <%= team?.chat?.lastMessagedAt ? new Date(team.chat.lastMessagedAt).toLocaleTimeString("default", {
+                    hour : "2-digit",
+                    minute : "2-digit"
+                  }) : '' %>
                 </span>
               </div>
               <p class="chat-preview mb-0 text-truncate">
-                <%= team?.lastMessage ? team.lastMessage.slice(0, 15) : (team.description || "Team workspace" ) %>
+                <%= team?.chat?.lastMessage ? team.chat.lastMessage.slice(0,15) : (team.description || "Team Workspace") %>
               </p>
             </div>
           </div>
@@ -75,7 +77,8 @@
 
       <% if (typeof users !=='undefined' && users.length> 0) { %>
         <% users.forEach(item=> { %>
-          <div class="chat-item user" data-id="<%= item.user._id %>" data-type="direct">
+          <div class="chat-item user" data-id="<%= item.user._id %>" data-chat-id="<%= item.chat?._id || '' %>"
+            data-type="direct">
             <img src="<%= item.user.profilePicture %>" alt="User Profile" class="chat-avatar me-3">
             <div class="flex-grow-1 overflow-hidden me-2">
               <div class="d-flex justify-content-between align-items-baseline">

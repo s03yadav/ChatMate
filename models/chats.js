@@ -9,6 +9,12 @@ const chatSchema = new Schema({
             required : true
         }
     ],
+    type : {
+        type : String, 
+        enum : ['direct', 'team'],
+        defailt : 'direct',
+        required : true,
+    },
     lastMessage : {
         type : String,
         default : null
