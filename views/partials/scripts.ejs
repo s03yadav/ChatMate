@@ -4,6 +4,8 @@
 <!-- Socket.IO Client -->
 <script src="/socket.io/socket.io.js"></script>
 
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   // =========================================================
   // 1. SOCKET CONNECTION & GLOBAL VARIABLES
@@ -181,12 +183,7 @@
   // Receive direct message
   socket.on("receive-message", (message) => {
     console.log("Receive Message : ", message);
-
-    updateChatPreview(message);
-
-    if (String(message.chatId) === String(currentChatId)) {
-      appendMessage(message);
-    }
+    handleIncomingDirectMessage(message);
   });
 
   // Append single message to direct chat DOM
@@ -322,6 +319,45 @@
 
     teamMessageInput.value = "";
   });
+
+  // handles notifications and sweet alert 
+  function handleIncomingDirectMessage(message) {
+    const isMine = String(message.sender.id) === String(loggedUserId);
+    const isCurrentChat = String(message.chatId) === String(currentChatId);
+
+    updateChatPreview(message);
+
+    if (isCurrentChat) {
+      appendMessage(message);
+      return;
+    }
+
+    if (isMine) {
+      return
+    }
+
+    if (message.seen === false) {
+      Swal.fire({
+        title: message.sender.userName,
+        text: message.text,
+        imageUrl: message.sender.profilePicture || '/user/default.jpg',
+        imageAlt: `${message.sender.userName}'s avatar`,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3500,
+        timerProgressBar: true,
+        customClass: {
+          popup: "glass-toast d-flex align-items-center gap-3",
+          image: "toast-avatar m-0 me-1",
+          title: "toast-title mb-0 fw-semibold text-dark",
+          htmlContainer: "toast-html mb-0 text-muted text-truncate",
+          timerProgressBar: "toast-progress"
+        }
+      });
+    }
+
+  }
 
   // Receive team message
   socket.on("receive-team-message", (message) => {
